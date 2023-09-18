@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Django学习笔记（三） | JessieChan的空间</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="邮件系统相关协议SMTPSMTP的全称是“Simple Mail Transfer Protocol”，即简单邮件传输协议 (25号端口)它是一组用于从源地址到目的地址传输邮件的规范，通过它来控制邮件的中转 属于“推送”协议 IMAPIMAP全称是Internet Mail Access Protocol，即交互式邮件访问协议，是一个应用层协议 (端口是143)用来从本地邮件客户端(Outlook">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Django学习笔记（三）">
+<meta property="og:url" content="http://example.com/2023/09/18/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%89/index.html">
+<meta property="og:site_name" content="JessieChan的空间">
+<meta property="og:description" content="邮件系统相关协议SMTPSMTP的全称是“Simple Mail Transfer Protocol”，即简单邮件传输协议 (25号端口)它是一组用于从源地址到目的地址传输邮件的规范，通过它来控制邮件的中转 属于“推送”协议 IMAPIMAP全称是Internet Mail Access Protocol，即交互式邮件访问协议，是一个应用层协议 (端口是143)用来从本地邮件客户端(Outlook">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/img_23_9_18/img.png">
+<meta property="og:image" content="http://example.com/img_23_9_18/img_1.png">
+<meta property="article:published_time" content="2023-09-18T13:07:32.000Z">
+<meta property="article:modified_time" content="2023-09-18T13:12:04.399Z">
+<meta property="article:author" content="Jessie Chan">
+<meta property="article:tag" content="Django">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img_23_9_18/img.png">
+  
+    <link rel="alternate" href="/atom.xml" title="JessieChan的空间" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">JessieChan的空间</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS 订阅"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="搜索"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Django学习笔记三" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/09/18/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%89/" class="article-date">
+  <time class="dt-published" datetime="2023-09-18T13:07:32.000Z" itemprop="datePublished">2023-09-18</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Django学习笔记（三）
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="邮件系统"><a href="#邮件系统" class="headerlink" title="邮件系统"></a>邮件系统</h1><h2 id="相关协议"><a href="#相关协议" class="headerlink" title="相关协议"></a>相关协议</h2><h3 id="SMTP"><a href="#SMTP" class="headerlink" title="SMTP"></a>SMTP</h3><p>SMTP的全称是“Simple Mail Transfer Protocol”，即简单邮件传输协议 (25号端口)<br>它是一组用于从源地址到目的地址传输邮件的规范，通过它来控制邮件的中转 属于“推送”协议</p>
+<h3 id="IMAP"><a href="#IMAP" class="headerlink" title="IMAP"></a>IMAP</h3><p>IMAP全称是Internet Mail Access Protocol，即交互式邮件访问协议，是一个应用层协议 (端口是143)用来从本地邮件客户端(Outlook<br>Express、Foxmail、MozillaThunderbird等)<br>访问远程服务器上的邮件 属于“拉取”协议。</p>
+<h3 id="POP3"><a href="#POP3" class="headerlink" title="POP3"></a>POP3</h3><p>POP3是Post Office Protocol 3的简称，即邮局协议的第3个版本是TCP&#x2F;IP协议族中的一员<br>(默认端口是110)本协议主要用于支持使用客户端远程管理在服务器上的电子邮件 属于“拉取”协议</p>
+<h3 id="POP3与IMAP的区别"><a href="#POP3与IMAP的区别" class="headerlink" title="POP3与IMAP的区别"></a>POP3与IMAP的区别</h3><p>两者均为“拉取”型协议，负责从邮件服务器中 下载邮件·IMAP 具备 摘要浏览功能，可预览部分摘要，再下载整个邮件IMAP<br>为双向协议，客户端操作可反馈给服务器 ·POP3必须下载全部邮件，无摘要功能 ·POP3<br>为单向协议，客户端操作无法同步服务器。</p>
+<h3 id="对应的过程"><a href="#对应的过程" class="headerlink" title="对应的过程"></a>对应的过程</h3><blockquote>
+<p><img src="/./../img_23_9_18/img.png" alt="img.png"></p>
+</blockquote>
+<p>Django重点关注SMTP部分，也就是如何将对应的邮件发送到指定的用户。</p>
+<h2 id="Django发送邮箱"><a href="#Django发送邮箱" class="headerlink" title="Django发送邮箱"></a>Django发送邮箱</h2><ol>
+<li>申请QQ账号</li>
+<li>QQ邮箱授权<br>点击设置,点击账户,选择开启POP3&#x2F;SMTP服务。如下：<br><img src="/./../img_23_9_18/img_1.png" alt="img_1.png"></li>
+<li>拿到授权码</li>
+<li>在settings.py中进行对应的配置</li>
+</ol>
+<figure class="highlight pycon"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># 发送邮件配置</span><br><span class="line">EMAIL_BACKEND = &#x27;django.core.mail.backends.smtp.EmailBackend&#x27;</span><br><span class="line"># smpt服务地址</span><br><span class="line">EMAIL_HOST = &#x27;smtp.qq.com&#x27;</span><br><span class="line">EMAIL_PORT = 25  # 端口默认都是25不需要修改</span><br><span class="line"># 发送邮件的邮箱，需要配置开通SMTP</span><br><span class="line">EMAIL_HOST_USER = &#x27;xxxx@qq.com&#x27;</span><br><span class="line"># 在邮箱中设置的客户端授权密码</span><br><span class="line"># 此处的EMAIL_HOST_PASSWORD是用QQ邮箱授权码登录</span><br><span class="line">EMAIL_HOST_PASSWORD = &#x27;xxxx&#x27;</span><br><span class="line"># 收件人看到的发件人</span><br><span class="line">EMAIL_FROM = &#x27;xxxx@qq.com&#x27;</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>调用Django内置的函数</li>
+</ol>
+<figure class="highlight pycon"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">from django.core import mail</span><br><span class="line">def cache_test(request):</span><br><span class="line">    mail.send_mail(</span><br><span class="line">        subject=&#x27;邮件标题&#x27;,</span><br><span class="line">        message=&#x27;邮件消息&#x27;,</span><br><span class="line">        from_email=&#x27;xxxx@qq.com&#x27; # 发送者,默认为当前配置的邮箱</span><br><span class="line">        recipient_list=[&#x27;xxx@qq.com&#x27;]  # 接收者列表</span><br><span class="line">    )</span><br><span class="line">    return  HttpResponse(&#x27;发送成功&#x27;)</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/09/18/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%89/" data-id="clmowomoz0000mctx0lo0ai87" data-title="Django学习笔记（三）" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Django/" rel="tag">Django</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2023/09/15/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%BA%8C/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">后一篇</strong>
+      <div class="article-nav-title">Django学习笔记（二）</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Django/" rel="tag">Django</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Vue/" rel="tag">Vue</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%97%B2%E8%81%8A/" rel="tag">闲聊</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Django/" style="font-size: 20px;">Django</a> <a href="/tags/Vue/" style="font-size: 10px;">Vue</a> <a href="/tags/%E9%97%B2%E8%81%8A/" style="font-size: 10px;">闲聊</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/09/">九月 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/06/">六月 2023</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2023/09/18/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%89/">Django学习笔记（三）</a>
+          </li>
+        
+          <li>
+            <a href="/2023/09/15/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%BA%8C/">Django学习笔记（二）</a>
+          </li>
+        
+          <li>
+            <a href="/2023/09/10/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80/">Django学习笔记(一)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/27/vue%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/">vue学习笔记(一)</a>
+          </li>
+        
+          <li>
+            <a href="/2023/06/19/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/">我的第一篇博客</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2023 Jessie Chan<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
