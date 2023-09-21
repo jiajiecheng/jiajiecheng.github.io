@@ -73,6 +73,148 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Django学习笔记四" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2023/09/21/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E5%9B%9B/" class="article-date">
+  <time class="dt-published" datetime="2023-09-21T15:09:26.000Z" itemprop="datePublished">2023-09-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2023/09/21/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E5%9B%9B/">Django学习笔记（四）</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="Celery结合Django"><a href="#Celery结合Django" class="headerlink" title="Celery结合Django"></a>Celery结合Django</h1><h2 id="验证码功能的实现"><a href="#验证码功能的实现" class="headerlink" title="验证码功能的实现"></a>验证码功能的实现</h2><ol>
+<li>注册容联云,获取对应<code>AUTH＿TOKEN</code>,查看接入文档</li>
+</ol>
+<figure class="highlight pycon"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">对应接入指南：https://doc.yuntongxun.com/p/5a531a353b8496dd00dcdfe2</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>使用容联通云sdk</li>
+</ol>
+<figure class="highlight pycon"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># pip install pip install ronglian_sms_sdk</span><br><span class="line"># 初始化SDK</span><br><span class="line">sdk = SmsSDK(accId, accToken, appId)</span><br><span class="line">#  调用发送短信方法,data为元组,是需要传递到短信模板中的数据</span><br><span class="line">sdk.sendMessage(tid, mobile, datas)</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>验证码功能的流程<br>发送Ajax请求到后端1，前端页面 点击“免费获取验证码”后端接到请求后<br>1,生成随机验证码<br>2,存储验证码<br>3,发送验证码<br>注册时，需要提交验证码，并在注册逻辑中对比验证码是否正确。</li>
+<li>完成前端代码:</li>
+</ol>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;UTF-8&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>发送短信<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">href</span>=<span class="string">&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css&quot;</span> <span class="attr">rel</span>=<span class="string">&quot;stylesheet&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">&quot;https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;modal-body&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">form</span> <span class="attr">class</span>=<span class="string">&quot;container&quot;</span> <span class="attr">id</span>=<span class="string">&quot;loginform&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;form-group row&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;col-sm-1&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">label</span> <span class="attr">class</span>=<span class="string">&quot;col-sm-3 col-form-label&quot;</span>&gt;</span>短信验证<span class="tag">&lt;/<span class="name">label</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;col-sm-7&quot;</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;input-group input-group-sm&quot;</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">&quot;text&quot;</span> <span class="attr">class</span>=<span class="string">&quot;form-control&quot;</span> <span class="attr">id</span>=<span class="string">&quot;captcha&quot;</span> <span class="attr">name</span>=<span class="string">&quot;captcha&quot;</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">&quot;input-group-append&quot;</span>&gt;</span></span><br><span class="line">                                        <span class="tag">&lt;<span class="name">button</span> <span class="attr">type</span>=<span class="string">&quot;button&quot;</span> <span class="attr">class</span>=<span class="string">&quot;btn btn-info btn-flat&quot;</span> <span class="attr">id</span>=<span class="string">&quot;captchabtn&quot;</span></span></span><br><span class="line"><span class="tag">                                                <span class="attr">onclick</span>=<span class="string">&quot;sendcaptcha()&quot;</span>&gt;</span>发送验证码<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line">                                    <span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">form</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- /.card-body --&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;modal-footer justify-content-between&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">&quot;loginerror&quot;</span> <span class="attr">class</span>=<span class="string">&quot;text-danger&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">button</span> <span class="attr">type</span>=<span class="string">&quot;button&quot;</span> <span class="attr">class</span>=<span class="string">&quot;btn btn-info&quot;</span> <span class="attr">onclick</span>=<span class="string">&quot;login()&quot;</span>&gt;</span>注册账号<span class="tag">&lt;/<span class="name">button</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">    <span class="comment">/* 倒计时效果函数 */</span></span></span><br><span class="line"><span class="language-javascript">    <span class="keyword">function</span> <span class="title function_">SmsTimer</span>(<span class="params"></span>) &#123;</span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// 将标签设置为不可点击的</span></span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// jquery 的变量一般以 $ 开头</span></span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">var</span> $btnEle = $(<span class="string">&#x27;#captchabtn&#x27;</span>);</span></span><br><span class="line"><span class="language-javascript">        $btnEle.<span class="title function_">attr</span>(<span class="string">&quot;disabled&quot;</span>,<span class="literal">true</span>);</span></span><br><span class="line"><span class="language-javascript">        <span class="comment">// 设置定时器读秒效果和标签文本内容的修改</span></span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">var</span> timer = <span class="number">60</span>;</span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">var</span> t = <span class="built_in">setInterval</span>(</span></span><br><span class="line"><span class="language-javascript">            <span class="keyword">function</span> (<span class="params"></span>) &#123;</span></span><br><span class="line"><span class="language-javascript">                $btnEle.<span class="title function_">text</span>(<span class="string">`<span class="subst">$&#123;timer&#125;</span>秒后重新发送`</span>);</span></span><br><span class="line"><span class="language-javascript">                timer--;</span></span><br><span class="line"><span class="language-javascript">                <span class="comment">// 如果小于0就将定时器清除并且将$btnEle设置为可操作</span></span></span><br><span class="line"><span class="language-javascript">                <span class="keyword">if</span> (timer &lt;= <span class="number">0</span>) &#123;</span></span><br><span class="line"><span class="language-javascript">                    <span class="built_in">clearInterval</span>(t);</span></span><br><span class="line"><span class="language-javascript">                    $btnEle.<span class="title function_">text</span>(<span class="string">&#x27;发送验证码&#x27;</span>);</span></span><br><span class="line"><span class="language-javascript">                    $btnEle.<span class="title function_">attr</span>(<span class="string">&#x27;disabled&#x27;</span>, <span class="literal">false</span>);</span></span><br><span class="line"><span class="language-javascript">                &#125;</span></span><br><span class="line"><span class="language-javascript">            &#125;,</span></span><br><span class="line"><span class="language-javascript">            <span class="number">1000</span> <span class="comment">// 1秒中执行一次这个函数</span></span></span><br><span class="line"><span class="language-javascript">        )</span></span><br><span class="line"><span class="language-javascript">    &#125;</span></span><br><span class="line"><span class="language-javascript">    <span class="comment">/* 发送手机短信验证码 */</span></span></span><br><span class="line"><span class="language-javascript">    <span class="keyword">function</span> <span class="title function_">sendcaptcha</span>(<span class="params"></span>) &#123;</span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">var</span> mobile = $(<span class="string">&#x27;#captcha&#x27;</span>).<span class="title function_">val</span>();</span></span><br><span class="line"><span class="language-javascript">        <span class="variable language_">console</span>.<span class="title function_">log</span>(mobile)</span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">var</span> mobilereg = <span class="regexp">/^(0|86|17951)?(13[0-9]|15[012356789]|17[0-8]|18[0-9]|14[5679]|19[189]|16[56])[0-9]&#123;8&#125;$/</span>;</span></span><br><span class="line"><span class="language-javascript">        <span class="keyword">if</span> (mobile.<span class="property">length</span> == <span class="number">11</span> &amp;&amp;  mobilereg.<span class="title function_">test</span>(mobile)) &#123;</span></span><br><span class="line"><span class="language-javascript">            $.<span class="title function_">ajax</span>(&#123;</span></span><br><span class="line"><span class="language-javascript">                <span class="attr">url</span>: <span class="string">&#x27;&#123;% url &#x27;</span><span class="attr">front</span>:index<span class="string">&#x27; %&#125;&#x27;</span>,</span></span><br><span class="line"><span class="language-javascript">                <span class="attr">type</span>:<span class="string">&#x27;post&#x27;</span>,</span></span><br><span class="line"><span class="language-javascript">                <span class="attr">data</span>: &#123;</span></span><br><span class="line"><span class="language-javascript">                    <span class="string">&#x27;mobile&#x27;</span>: mobile,</span></span><br><span class="line"><span class="language-javascript">                &#125;,</span></span><br><span class="line"><span class="language-javascript">                <span class="attr">success</span>: <span class="keyword">function</span> (<span class="params">data</span>) &#123;</span></span><br><span class="line"><span class="language-javascript">                    <span class="keyword">if</span> (data[<span class="string">&#x27;status&#x27;</span>] === <span class="string">&#x27;success&#x27;</span>)&#123;</span></span><br><span class="line"><span class="language-javascript">                        <span class="title class_">SmsTimer</span>()</span></span><br><span class="line"><span class="language-javascript">                    &#125;<span class="keyword">else</span> &#123;</span></span><br><span class="line"><span class="language-javascript">                        <span class="title function_">alert</span>(<span class="string">&#x27;未成&#x27;</span>)</span></span><br><span class="line"><span class="language-javascript">                    &#125;</span></span><br><span class="line"><span class="language-javascript">                &#125;</span></span><br><span class="line"><span class="language-javascript">            &#125;)</span></span><br><span class="line"><span class="language-javascript">        &#125;<span class="keyword">else</span> &#123;</span></span><br><span class="line"><span class="language-javascript">            <span class="title function_">alert</span>(<span class="string">&#x27;手机号码错误&#x27;</span>)</span></span><br><span class="line"><span class="language-javascript">        &#125;</span></span><br><span class="line"><span class="language-javascript">    &#125;</span></span><br><span class="line"><span class="language-javascript"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>完成redis缓存的配置<br>使用redis作为缓存介质,存储短信验证码并且设置缓存的时间。</li>
+</ol>
+<figure class="highlight pycon"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># redis配置缓存</span><br><span class="line">CACHES = &#123;</span><br><span class="line">    &quot;default&quot;: &#123;</span><br><span class="line">        &quot;BACKEND&quot;: &quot;django_redis.cache.RedisCache&quot;,</span><br><span class="line">        &quot;LOCATION&quot;: &quot;redis://127.0.0.1:6379/1&quot;,</span><br><span class="line">        &quot;OPTIONS&quot;: &#123;</span><br><span class="line">            &quot;CLIENT CLASS&quot;: &quot;django_redis.client.DefaultClient&quot;,</span><br><span class="line">            &quot;CONNECTION_POOL_KWARGS&quot;: &#123;&quot;max_connections&quot;: 100&#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="6">
+<li>编写View视图功能代码</li>
+</ol>
+<figure class="highlight pycon"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># utils.py</span><br><span class="line">from ronglian_sms_sdk import SmsSDK</span><br><span class="line">def send_message(phone, message):</span><br><span class="line">    sdk = SmsSDK(&#x27;xxxxx&#x27;, &#x27;xxxxxx&#x27;,</span><br><span class="line">                 &#x27;xxxxxx&#x27;)</span><br><span class="line">    data = sdk.sendMessage(&#x27;1&#x27;, mobile=phone, datas=(message, 1))</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight pycon"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"># views.py</span><br><span class="line">import random</span><br><span class="line">from django.shortcuts import render</span><br><span class="line">from django.http import JsonResponse, HttpResponse</span><br><span class="line">from django.views import View</span><br><span class="line">from django.core.cache import cache</span><br><span class="line">from .utils import send_message</span><br><span class="line"></span><br><span class="line">class SmsView(View):</span><br><span class="line">    def get(self, request):</span><br><span class="line">        return render(request, &#x27;index.html&#x27;)</span><br><span class="line"></span><br><span class="line">    def post(self, request):</span><br><span class="line">        # 获取电话号码</span><br><span class="line">        mobile = request.POST.get(&#x27;mobile&#x27;)</span><br><span class="line">        # 生成随机码</span><br><span class="line">        code = random.randint(1000, 9999)</span><br><span class="line">        # 存储随机码 django_redis</span><br><span class="line">        # django 4.0 之后原生支持redis进行缓存,本版本使用的是3.2使用redis缓存的时候需要额外下载一个django-redis的包</span><br><span class="line">        # pip install django-redis</span><br><span class="line">        cache_key = f&#x27;sms_&#123;mobile&#125;&#x27;</span><br><span class="line">        # 检查是否已经有发过的且未过期的验证码</span><br><span class="line">        old_code = cache.get(cache_key)</span><br><span class="line">        if old_code:</span><br><span class="line">            return JsonResponse(&#123;</span><br><span class="line">                &#x27;status&#x27;: &#x27;error&#x27;,</span><br><span class="line">                &#x27;message&#x27;:&#x27;The sms_code is already existed&#x27;</span><br><span class="line">            &#125;)</span><br><span class="line">        # 将对应的验证码存储到缓存中</span><br><span class="line">        cache.set(cache_key, code, 60)</span><br><span class="line">        # 发送短信</span><br><span class="line">        send_message(mobile, code)</span><br><span class="line">        return JsonResponse(&#123;</span><br><span class="line">            &#x27;status&#x27;: &#x27;success&#x27;</span><br><span class="line">        &#125;)</span><br></pre></td></tr></table></figure>
+
+<p>redis缓存还可以使用以下方法调用</p>
+<figure class="highlight pycon"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#方式1 </span><br><span class="line">#cache.set/get (具备序列化和反序列化的功能，推荐使用此方法)</span><br><span class="line">#方式2</span><br><span class="line">#from django redis import get redis connection</span><br><span class="line">#r = get redis connection()</span><br><span class="line">#r.redis命令</span><br><span class="line">#方式3</span><br><span class="line">cache_page(60)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Celery优化异步"><a href="#Celery优化异步" class="headerlink" title="Celery优化异步"></a>Celery优化异步</h2><h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>以上的代码还存在一定的问题，如果容联云出现问题，<code>send_message(mobile, code)</code>会遭遇到堵塞，导致用户迟迟拿不到服务器返回的结果，影响用户的体验。<br>Celery遵循生产者消费者模型，通过redis作为数据管道（任务调度器），Django作为数据生产者，Celery作为消费者。</p>
+<h3 id="相关概念"><a href="#相关概念" class="headerlink" title="相关概念"></a>相关概念</h3><p>broker - 消息传输的中间件，生产者一旦有消息发送，将发至broker; [RQ，redis]<br>backend- 用于存储消息&#x2F;任务结果，如果需要跟踪和查询任务状态，则需添加要配置相关<br>worker- 工作者- 消费&#x2F;执行broker中消息&#x2F;任务的进程</p>
+<h3 id="整体架构图"><a href="#整体架构图" class="headerlink" title="整体架构图"></a>整体架构图</h3><blockquote>
+<p><img src="/../img_23_9_21/img.png" alt="img.png"></p>
+</blockquote>
+<h3 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h3><ol>
+<li>pip install celery<br>在对应的项目环境下安装celery框架</li>
+<li>创建worker</li>
+</ol>
+<figure class="highlight pycon"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># tasks.py</span><br><span class="line">from celery import  Celery</span><br><span class="line">app = Celery(&#x27;test&#x27;,broker=&#x27;redis://:@127.0.0.1:6379/1&#x27;)</span><br><span class="line"></span><br><span class="line"># 创建任函数</span><br><span class="line">@app.task</span><br><span class="line">def task_test():</span><br><span class="line">    print(&#x27;task is running&#x27;)</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>启动worker<br>Ubuntu 终端中,tasks.py文件同级目录下 执行<code>celery -A tasks worker --loglevel=info</code><br>此模式默认为前台启动，终端中会输出相关日志（注意，此时为前台启动）<br>注意：Windows下<code>celery4.0</code>需要搭配插件使用，否则会产生错误，操作如下：<ul>
+<li>pip install eventlet （安装此插件）</li>
+<li>celery -A <mymodule> worker -l info -P eventlet （启动添加 -P 参数）</li>
+</ul>
+</li>
+<li>消费者推送任务</li>
+</ol>
+<figure class="highlight pycon"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">from  .tasks import task_test</span><br><span class="line"># 将任务推送到的redis任务队列中</span><br><span class="line">task_test.delay()</span><br></pre></td></tr></table></figure>
+
+<p>执行完成之后注意观察<code>worker</code>日志。</p>
+<ol start="5">
+<li>输出成功</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[2023-09-21 22:13:25,002: INFO/MainProcess] Task task.task_test[75448350-1bda-4611-9ad9-75729ea01f7a] received</span><br><span class="line">[2023-09-21 22:13:25,003: WARNING/MainProcess] task is running</span><br><span class="line">[2023-09-21 22:13:25,008: INFO/MainProcess] Task task.task_test[75448350-1bda-4611-9ad9-75729ea01f7a] succeeded in 0.0s: None</span><br></pre></td></tr></table></figure>
+
+<h3 id="存储异步的结果"><a href="#存储异步的结果" class="headerlink" title="存储异步的结果"></a>存储异步的结果</h3><p>Celery提供存储任务执行结果的方案，需借助 redis 或 mysql 或 Memcached 等。celery允许我们将异步函数的值（函数返回值）存储到对应的存储介质中。<br>示例代码如下：</p>
+<figure class="highlight pycon"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># tasks.py</span><br><span class="line">from celery import  Celery</span><br><span class="line">app = Celery(&#x27;test&#x27;,broker=&#x27;redis://:@127.0.0.1:6379/1&#x27;,backend=&#x27;redis://:@127.0.0.1:6379/3&#x27;)</span><br><span class="line"></span><br><span class="line"># 创建任函数</span><br><span class="line">@app.task</span><br><span class="line">def task_test(a,b):</span><br><span class="line">    print(&#x27;task is running&#x27;)</span><br><span class="line">    return a + b</span><br></pre></td></tr></table></figure>
+
+<p>异步函数调用</p>
+<figure class="highlight pycon"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">from task import task_test</span><br><span class="line"></span><br><span class="line">s = task_test.delay(10, 100)</span><br><span class="line"># 调用 result, celery会帮助我们自动去backend中（这里是redis）查询对应结果</span><br><span class="line">print(s.result)</span><br></pre></td></tr></table></figure>
+
+<h3 id="使用celery优化项目"><a href="#使用celery优化项目" class="headerlink" title="使用celery优化项目"></a>使用celery优化项目</h3><h4 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h4><ol>
+<li>创建celery配置文件<ul>
+<li>项目同名目录下创建 celery.py（跟settings.py文件平级）</li>
+</ul>
+</li>
+<li>应用下创建 tasks.py 集中定义对应 worker函数</li>
+<li>视图函数充当生产者，推送具体worker函数</li>
+<li>项目目录下启动worker<ul>
+<li>celery -A 项目同名目录名 worker -linfo</li>
+</ul>
+</li>
+</ol>
+<h4 id="修改代码"><a href="#修改代码" class="headerlink" title="修改代码"></a>修改代码</h4><ol>
+<li>创建celery.py文件，编写对应的代码</li>
+</ol>
+<figure class="highlight pycon"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># celery.py</span><br><span class="line">from celery import Celery</span><br><span class="line">from django.conf import settings</span><br><span class="line">import os</span><br><span class="line"></span><br><span class="line">#  将celery与django项目融合 Linux环境下使用</span><br><span class="line">os.environ.setdefault(&#x27;DJANGO_SETTINGS_MODULE&#x27;, &#x27;study_celery.settings&#x27;)</span><br><span class="line"></span><br><span class="line">app = Celery(&#x27;study_celery&#x27;)</span><br><span class="line"># celery提供的更新配置项的方法</span><br><span class="line">app.conf.update(</span><br><span class="line">    BROKER_URL=&#x27;redis://:@127.0.0.1:6379/1&#x27;</span><br><span class="line">)</span><br><span class="line"># 自动发现worker函数，也就是定义在app目录下tasks.py文件里面的函数</span><br><span class="line">app.autodiscover_tasks(settings.INSTALLED_APPS)</span><br><span class="line"># 启动</span><br><span class="line"># celery -A study_celery  worker -l info -P eventlet</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>创建worker任务，在app目录下创建对应的文件</li>
+</ol>
+<figure class="highlight pycon"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#tasks.py</span><br><span class="line">from ronglian_sms_sdk import SmsSDK</span><br><span class="line">from study_celery.celery import app</span><br><span class="line"></span><br><span class="line">@app.task</span><br><span class="line">def send_message(phone, message):</span><br><span class="line">    sdk = SmsSDK(&#x27;xxxxx&#x27;, &#x27;xxxxx&#x27;,</span><br><span class="line">                 &#x27;xxxxx&#x27;)</span><br><span class="line">    sdk.sendMessage(&#x27;1&#x27;, mobile=phone, datas=(message, 1))</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>修改视图函数</li>
+</ol>
+<figure class="highlight pycon"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">from .tasks import send_message</span><br><span class="line"><span class="meta prompt_">...</span></span><br><span class="line">  send_message.delay(mobile, code)</span><br><span class="line"><span class="meta prompt_">...</span></span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li><p>正式环境启动（Linux）<br>命令：nohup celery -A proj worker -P gevent -c 1000 &gt; celery.log<br>2&gt;&amp;1&amp;</p>
+<ul>
+<li>nohup:忽略所有挂断 (SIGHUP) 信号</li>
+<li>标准输入是文件描述符0。它是命令的输入，缺省是键盘，也可以是文件或其他命令的输出。</li>
+<li>标准输出是文件描述符1。它是命令的输出，缺省是屏幕，也可以是文件。</li>
+<li>标准错误是文件描述符2。这是命令错误的输出，缺省是屏幕，同样也可以是文件。</li>
+<li>3，&amp;符号: 代表将命令在后台执行</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2023/09/21/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E5%9B%9B/" data-id="clmtbds420004jotx0izr2h5z" data-title="Django学习笔记（四）" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Django/" rel="tag">Django</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Redis学习笔记一" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2023/09/19/Redis%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80/" class="article-date">
@@ -193,7 +335,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2023/09/19/Redis%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80/" data-id="clmqg58vr0009wotx543aamc9" data-title="Redis学习笔记（一）" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2023/09/19/Redis%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80/" data-id="clmtbds420005jotxf6j8b47h" data-title="Redis学习笔记（一）" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -253,7 +395,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2023/09/18/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%89/" data-id="clmqg58vk0001wotxgm7e4oi9" data-title="Django学习笔记（三）" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2023/09/18/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%89/" data-id="clmtbds3y0001jotxheql102v" data-title="Django学习笔记（三）" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -370,7 +512,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2023/09/15/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%BA%8C/" data-id="clmqg58vn0003wotxf3lm6w6s" data-title="Django学习笔记（二）" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2023/09/15/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%BA%8C/" data-id="clmtbds410003jotx6r3b1nka" data-title="Django学习笔记（二）" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -398,7 +540,7 @@
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/09/10/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80/">Django学习笔记(一)</a>
+      <a class="p-name article-title" href="/2023/09/10/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80/">Django学习笔记（一）</a>
     </h1>
   
 
@@ -481,7 +623,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2023/09/10/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80/" data-id="clmqg58vf0000wotxebld853j" data-title="Django学习笔记(一)" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2023/09/10/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80/" data-id="clmtbds3u0000jotx9aup888m" data-title="Django学习笔记（一）" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -509,7 +651,7 @@
         
   
     <h1 itemprop="name">
-      <a class="p-name article-title" href="/2023/06/27/vue%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/">vue学习笔记(一)</a>
+      <a class="p-name article-title" href="/2023/06/27/vue%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/">vue学习笔记（一）</a>
     </h1>
   
 
@@ -556,7 +698,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2023/06/27/vue%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/" data-id="clmqg58vs000awotxdgnk67xc" data-title="vue学习笔记(一)" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2023/06/27/vue%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/" data-id="clmtbds440008jotxaepo7sy7" data-title="vue学习笔记（一）" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -597,7 +739,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2023/06/19/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" data-id="clmqg58vu000cwotxhbg5by21" data-title="我的第一篇博客" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://example.com/2023/06/19/%E6%88%91%E7%9A%84%E7%AC%AC%E4%B8%80%E7%AF%87%E5%8D%9A%E5%AE%A2/" data-id="clmtbds45000ajotx3max6qze" data-title="我的第一篇博客" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -656,6 +798,10 @@
       <ul>
         
           <li>
+            <a href="/2023/09/21/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E5%9B%9B/">Django学习笔记（四）</a>
+          </li>
+        
+          <li>
             <a href="/2023/09/19/Redis%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80/">Redis学习笔记（一）</a>
           </li>
         
@@ -668,11 +814,7 @@
           </li>
         
           <li>
-            <a href="/2023/09/10/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80/">Django学习笔记(一)</a>
-          </li>
-        
-          <li>
-            <a href="/2023/06/27/vue%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0-%E4%B8%80/">vue学习笔记(一)</a>
+            <a href="/2023/09/10/Django%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B8%80/">Django学习笔记（一）</a>
           </li>
         
       </ul>
